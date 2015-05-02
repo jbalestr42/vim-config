@@ -1,14 +1,3 @@
-*.DS_Store
-*.swp
-Objects
-Octodyssey
-Makefile.bak
-Main/DefineResources.hpp
-DataConverter/data_converter
-DataConverter/DefineResources.hpp
-DataConverter/data
-DataConverter/log
-log
-options.cfg
-a.out
-callgrind.*
+*
+!.vim
+!.vimrc
