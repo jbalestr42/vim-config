@@ -1,0 +1,3 @@
+g++ -o data_converter main.cpp ../Main/DataManager.cpp -I../Main/ -I../ -I../Octo -L../Lib/SFML/MacOSX/lib -lsfml-graphics -I../Lib/SFML/include
+./data_converter $1
+cp DefineResources.hpp ../Main/

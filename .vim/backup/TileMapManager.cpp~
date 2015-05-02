@@ -1,0 +1,256 @@
+#include "MapManager.hpp"
+
+MapManager::MapManager(void) :
+	m_tiles(new Map(120, 68)),
+	m_tilesPrev(new Map(120, 68)),
+	mf_transitionTimer(1.f),
+	mf_transitionTimeMax(0.4f),
+	mf_offsetX(0.f),
+	mf_offsetY(0.f)
+{
+}
+
+MapManager::~MapManager(void)
+{
+	delete m_tiles;
+	delete m_tilesPrev;
+}
+
+void MapManager::setTransitionAppear(int x, int y)
+{
+	int i = 0;
+	while (y + i < m_tiles->getRows() - 1 && m_tiles->get(x, y + i).me_transition == Tile::e_transition_appear)
+		i++;
+	for (int j = 0; j < 4; j++)
+		m_tilesPrev->get(x, y).m_startTransition[j].y = m_tilesPrev->get(x, y + i).m_startTransition[j].y;
+	setTransitionModify(x, y);
+}
+
+void MapManager::setTransitionDisappear(int x, int y)
+{
+	int i = 0;
+	while (y + i < m_tiles->getRows() - 1 && m_tiles->get(x, y + i).me_transition == Tile::e_transition_disappear)
+		i++;
+	for (int j = 0; j < 4; j++)
+		m_tiles->get(x, y).m_startTransition[j].y = m_tiles->get(x, y + i).m_startTransition[j].y;
+}
+
+void MapManager::setTransitionModify(int x, int y)
+{
+	// define if it's a quad or a triangle
+	m_tiles->get(x, y).m_startTransition[0] = sf::Vector2f(x * Tile::TileSize, y * Tile::TileSize);
+	m_tiles->get(x, y).m_startTransition[1] = sf::Vector2f(x * Tile::TileSize + Tile::TileSize, y * Tile::TileSize);
+	m_tiles->get(x, y).m_startTransition[2] = sf::Vector2f(x * Tile::TileSize + Tile::TileSize, y * Tile::TileSize + Tile::TileSize);
+	m_tiles->get(x, y).m_startTransition[3] = sf::Vector2f(x * Tile::TileSize, y * Tile::TileSize + Tile::TileSize);
+	if (y - 1 >= 0 && m_tiles->get(x, y - 1).isEmpty())
+	{
+		if (x - 1 >= 0 && m_tiles->get(x - 1, y).isEmpty())
+			m_tiles->get(x, y).m_startTransition[0].y += Tile::TileSize;
+		if (x + 1 < m_tiles->getColumns() && m_tiles->get(x + 1, y).isEmpty())
+			m_tiles->get(x, y).m_startTransition[1].y += Tile::TileSize;
+	}
+}
+
+void MapManager::setTransitionCentered(Map * tiles, int x, int y)
+{
+	sf::Vertex * ver = tiles->get(x, y).mp_upLeft;
+	for (int i = 0; i < 2; i++)
+	{
+		ver[i].position.x = ver[i + 2].position.x;
+		ver[i].position.y = ver[i + 2].position.y;
+	}
+}
+
+void MapManager::defineTransition(int x, int y)
+{
+	int prev = m_tilesPrev->get(x, y).isEmpty();
+	int current = m_tiles->get(x, y).isEmpty();
+
+	if (prev && !current) // appear
+		m_tiles->get(x, y).me_transition = Tile::e_transition_appear;
+	else if (!prev && current) // disappear
+		m_tiles->get(x, y).me_transition = Tile::e_transition_disappear;
+	else if (!current && !prev) // already a tile
+		m_tiles->get(x, y).me_transition = Tile::e_transition_already;
+	else // no tile
+	{
+		setTransitionCentered(m_tilesPrev, x, y);
+		m_tiles->get(x, y).me_transition = Tile::e_transition_none;
+	}
+}
+
+void MapManager::defineTransition(void)
+{
+	defineTransitionRange(0, m_tiles->getColumns(), 0, m_tiles->getRows());
+}
+
+void MapManager::defineTransitionRange(int p_startX, int p_endX, int p_startY, int p_endY)
+{
+	// For each tile, define the type and transition type
+	for (int x = p_startX; x < p_endX; x++)
+	{
+		for (int y = p_startY; y < p_endY; y++)
+			defineTransition(x, y);
+	}
+	for (int x = p_startX; x < p_endX; x++)
+	{
+		for (int y = p_startY; y < p_endY; y++)
+		{
+			if (m_tiles->get(x, y).me_transition == Tile::e_transition_appear)
+				setTransitionAppear(x, y);
+		}
+	}
+	for (int x = p_startX; x < p_endX; x++)
+	{
+		for (int y = p_startY; y < p_endY; y++)
+		{
+			if (m_tiles->get(x, y).me_transition == Tile::e_transition_already)
+				setTransitionModify(x, y);
+		}
+	}
+	for (int x = p_startX; x < p_endX; x++)
+	{
+		for (int y = p_startY; y < p_endY; y++)
+		{
+			if (m_tiles->get(x, y).me_transition == Tile::e_transition_disappear)
+				setTransitionDisappear(x, y);
+		}
+	}
+}
+
+void MapManager::clearTransition(void)
+{
+	for (int x = 0; x < m_tiles->getColumns(); x++)
+	{
+		for (int y = 0; y < m_tiles->getRows(); y++)
+		{
+			if (m_tiles->get(x, y).me_transition == Tile::e_transition_none)
+			{
+				for (int i = 0; i < 2; i++)
+				{
+					m_tilesPrev->get(x, y).mp_upLeft[i].position.x = m_tilesPrev->get(x, y).mp_upLeft[i + 2].position.x;
+					m_tilesPrev->get(x, y).mp_upLeft[i].position.y = m_tilesPrev->get(x, y).mp_upLeft[i + 2].position.y;
+				}
+			}
+		}
+	}
+}
+
+void MapManager::lerp(sf::Vector2f & p_result, sf::Vector2f & p_start, sf::Vector2f & p_end, float p_transition)
+{
+	p_result = p_start * (1.f - p_transition) + p_end * p_transition;
+}
+
+void MapManager::swapMap(void)
+{
+	Map * tmp = m_tilesPrev;
+	m_tilesPrev = m_tiles;
+	m_tiles = tmp;
+	m_tiles->computeMap();
+	defineTransition();
+}
+
+void MapManager::updateTransition(float pf_deltatime)
+{
+	if (mf_transitionTimer > mf_transitionTimeMax)
+	{
+		pf_deltatime = mf_transitionTimer - mf_transitionTimeMax;
+		mf_transitionTimer = mf_transitionTimeMax;
+	}
+	float transition = mf_transitionTimer / mf_transitionTimeMax;
+	for (int x = 0; x < m_tiles->getColumns(); x++)
+	{
+		for (int y = 0; y < m_tiles->getRows(); y++)
+		{
+			if (m_tiles->get(x, y).me_transition == Tile::e_transition_none)
+				continue;
+			for (int i = 0; i < 4; i++)
+			{
+				lerp(m_tilesPrev->get(x, y).mp_upLeft[i].position, m_tilesPrev->get(x, y).m_startTransition[i], m_tiles->get(x, y).m_startTransition[i], transition);
+				m_tilesPrev->get(x, y).mp_upLeft[i].position.x += mf_offsetX - Tile::DoubleTileSize;
+				m_tilesPrev->get(x, y).mp_upLeft[i].position.y += mf_offsetY - Tile::DoubleTileSize;
+			}
+		}
+	}
+}
+
+void MapManager::updateOffset(float pf_deltatime)
+{
+	float speed = 200.f * pf_deltatime;
+
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right))
+		mf_offsetX += speed;
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left))
+		mf_offsetX -= speed;
+	if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down))
+		mf_offsetY += speed;
+	else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Up))
+		mf_offsetY -= speed;
+
+	if (mf_offsetX >= 16.f)
+	{
+		mf_offsetX -= 16.f;
+		m_tiles->addOffsetX(-1);
+		m_tilesPrev->addOffsetX(-1);
+		clearTransition();
+		defineTransitionRange(0, 2, 0, m_tiles->getRows());
+	}
+	else if (mf_offsetX <= -16.f)
+	{
+		mf_offsetX += 16.f;
+		m_tiles->addOffsetX(1);
+		m_tilesPrev->addOffsetX(1);
+		clearTransition();
+		defineTransitionRange(m_tiles->getColumns() - 2, m_tiles->getColumns(), 0, m_tiles->getRows());
+	}
+	if (mf_offsetY >= 16.f)
+	{
+		mf_offsetY -= 16.f;
+		m_tiles->addOffsetY(-1);
+		m_tilesPrev->addOffsetY(-1);
+		clearTransition();
+		defineTransitionRange(0, m_tiles->getColumns(), 0, 2);
+	}
+	else if (mf_offsetY <= -16.f)
+	{
+		mf_offsetY += 16.f;
+		m_tiles->addOffsetY(1);
+		m_tilesPrev->addOffsetY(1);
+		clearTransition();
+		defineTransitionRange(0, m_tiles->getColumns(), m_tiles->getRows() - 2, m_tiles->getRows());
+	}
+}
+
+void MapManager::update(float pf_deltatime)
+{
+	bool compute = false;
+	mf_transitionTimer += pf_deltatime;
+
+	if (mf_transitionTimer >= mf_transitionTimeMax)
+	{
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::E))
+		{
+			compute = true;
+			m_tilesPrev->nextStep();
+			m_tiles->nextStep();
+		}
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::R))
+		{
+			compute = true;
+			m_tilesPrev->previousStep();
+			m_tiles->previousStep();
+		}
+		if (compute)
+		{
+			mf_transitionTimer = 0.f;
+			swapMap();
+		}
+	}
+	updateOffset(pf_deltatime);
+	updateTransition(pf_deltatime);
+}
+
+void MapManager::draw(sf::RenderTarget& render, sf::RenderStates states) const
+{
+	render.draw(*m_tilesPrev);
+}

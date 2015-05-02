@@ -1,0 +1,11 @@
+#include "ScreenBase.hpp"
+
+AScreenBase::AScreenBase(void)
+{
+
+}
+
+AScreenBase::~AScreenBase(void)
+{
+
+}

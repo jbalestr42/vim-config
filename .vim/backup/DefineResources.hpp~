@@ -1,0 +1,4 @@
+// Defines for each textures
+#define TEXTURE_BOB 0
+#define TEXTURE_GARY 1
+#define TEXTURE_ISAAC 2

@@ -1,0 +1,32 @@
+#include "ScreenTestJuj.hpp"
+#include "ResourcesManager.hpp"
+
+ScreenTestJuj::ScreenTestJuj(void)
+{
+	mp_sprite = new sf::Sprite();
+	mp_sprite->setTexture(ResourcesManager::getCurrent().getTexture(TEXTURE_BOB));
+	mp_sprite->setPosition(sf::Vector2f(50.f, 50.f));
+}
+
+ScreenTestJuj::~ScreenTestJuj(void)
+{
+	delete mp_sprite;
+}
+
+void ScreenTestJuj::init(void)
+{
+}
+
+void ScreenTestJuj::update(float pf_deltatime)
+{
+}
+
+void ScreenTestJuj::draw(sf::RenderTarget &p_target, sf::RenderStates p_states) const
+{
+	p_target.draw(*mp_sprite);
+}
+
+void ScreenTestJuj::pollEvent(sf::Event p_event)
+{
+
+}

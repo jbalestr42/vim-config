@@ -1,0 +1,63 @@
+#ifndef DATAMANAGER_HPP
+# define DATAMANAGER_HPP
+
+# include <vector>
+# include <iostream>
+# include <ftw.h>
+# include <fnmatch.h>
+# include <map>
+# include <SFML/Graphics.hpp>
+
+class DataManager
+{
+public:
+	struct MainHeader
+	{
+		int		mn_nbFile;
+		int		mn_totalSize;
+
+		MainHeader(void);
+		~MainHeader(void);
+
+	};
+
+	struct File
+	{
+		struct Header
+		{
+			int		mn_size;
+			int		mn_nameSize;
+			char	m_name[256];
+		};
+
+		Header						m_header;
+		std::vector<unsigned char>	m_buffer;
+
+		File(void);
+		File(int pn_size, std::string p_name);
+		~File(void);
+		friend std::ostream & operator<<(std::ostream & p_ostream, File const & p_file);
+
+	};
+
+private:
+	MainHeader						m_mainHeader;
+	std::vector<File>				m_files;
+	std::map<int, sf::Texture *>	m_textures;
+
+	DataManager(void);
+	static DataManager *msp_current;
+
+public:
+	~DataManager(void);
+
+	static DataManager & getCurrent(void);
+	static void destroy(void);
+	void read(std::string const & p_filename);
+	void createData(std::string const & p_path);
+	void createFiles(std::string const & p_filename);
+	void createMemoryFile(std::string const & p_filename);
+
+};
+
+#endif

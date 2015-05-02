@@ -1,0 +1,1 @@
+g++ *.cpp -Wall -Wextra -Werror -I ~/42/Octodyssey/Lib/SFML/include -L ~/Documents/Dev/Lib/SFML-2.2/lib -lsfml-graphics -lsfml-window -lsfml-system

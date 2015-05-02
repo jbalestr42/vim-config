@@ -1,0 +1,32 @@
+#ifndef MAPOBJECT_HPP
+# define MAPOBJECT_HPP
+
+# include "Map/Map.hpp"
+
+class MapObject : public Map
+{
+public:
+	MapObject(unsigned int pn_width, unsigned int pn_height);
+	virtual ~MapObject(void);
+
+	virtual void nextStep(void);
+	virtual void previousStep(void);
+	virtual void computeMapRange(int p_startX, int p_endX, int p_startY, int p_endY);
+
+protected:
+	virtual void initBiome(void);
+	virtual float firstCurve(float * vec);
+	virtual float secondCurve(float * vec);
+	virtual void setColor(Tile & p_tile);
+
+private:
+	MapObject(void) = delete;
+
+	int		mn_depth;
+	Tile		****m_tiles;
+
+	void load(void);
+
+};
+
+#endif

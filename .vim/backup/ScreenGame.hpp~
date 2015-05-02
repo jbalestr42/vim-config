@@ -1,0 +1,23 @@
+#ifndef SCREENGAME_HPP
+# define SCREENGAME_HPP
+
+# include "ScreenBase.hpp"
+# include "Player.hpp"
+
+class ScreenGame : public AScreenBase
+{
+private:
+	Player m_player;
+
+	virtual void draw(sf::RenderTarget &p_target, sf::RenderStates p_states) const;
+
+public:
+	ScreenGame(void);
+	virtual ~ScreenGame(void);
+
+	void init(void);
+	void update(float pf_deltatime);
+	void pollEvent(sf::Event p_event);
+};
+
+#endif

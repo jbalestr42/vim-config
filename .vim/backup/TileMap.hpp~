@@ -1,0 +1,104 @@
+#ifndef TILEMAP_HPP
+# define TILEMAP_HPP
+
+# include <map>
+# include "Matrix.hpp"
+# include <SFML/Graphics.hpp>
+
+struct Biome
+{
+	int		mn_height;
+};
+
+struct Tile
+{
+	enum ETransitionType
+	{
+		e_transition_appear,
+		e_transition_disappear,
+		e_transition_already,
+		e_transition_none
+	};
+
+	static constexpr float	TileSize = 16.f;
+	static constexpr float	DoubleTileSize = Tile::TileSize * 2.f;
+	static constexpr float	HalfTileSize = Tile::TileSize / 2.f;
+
+	int			mn_tileType;
+	float			mf_noiseValue;
+	ETransitionType		me_transition;
+	sf::Vertex *		mp_upLeft;
+	sf::Vector2f		m_startTransition[4];
+
+	Tile(void) :
+		mn_tileType(0),
+		mf_noiseValue(0.f),
+		me_transition(e_transition_none),
+		mp_upLeft(0)
+	{}
+
+	bool isEmpty(void)
+	{
+		if (mn_tileType == 0)
+			return true;
+		return false;
+	}
+
+	void setColor(sf::Color const & p_color)
+	{
+		for (int i = 0; i < 4; i++)
+			mp_upLeft[i].color = p_color;
+	}
+
+	void copy(Tile const & p_tile, float p_offsetX, float p_offsetY)
+	{
+		mn_tileType = p_tile.mn_tileType;
+		me_transition = p_tile.me_transition;
+		for (int i = 0; i < 4; i++)
+		{
+			m_startTransition[i].x = p_tile.m_startTransition[i].x + p_offsetX;
+			m_startTransition[i].y = p_tile.m_startTransition[i].y + p_offsetY;
+		}
+	}
+};
+
+class Map : public sf::Drawable, public sf::Transformable
+{
+public:
+	typedef Matrix<Tile*> Map;
+
+	Map(unsigned int pn_width, unsigned int pn_height);
+	~Map(void);
+
+	unsigned int getVerticeCount(void) const;
+	unsigned int getColumns(void) const;
+	unsigned int getRows(void) const;
+	Tile & get(unsigned int column, unsigned int row);
+	Tile const & get(unsigned int column, unsigned int row) const;
+
+	void computeMap(void);
+	void computeMapRange(int p_startX, int p_endX, int p_startY, int p_endY);
+	void draw(sf::RenderTarget& render, sf::RenderStates states) const;
+	void addOffsetX(int p_offsetX);
+	void addOffsetY(int p_offsetY);
+
+	// first and second curve must return a value between -1 and 1
+	virtual float firstCurve(float * vec);
+	virtual float secondCurve(float * vec);
+	virtual void nextStep(void);
+	virtual void previousStep(void);
+
+private:
+	Map(void) = delete;
+	void initQuad(int x, int y);
+
+	Map								m_tiles;
+	std::unique_ptr<sf::Vertex[]>	m_vertices;
+	unsigned int					mn_verticesCount;
+	float							mf_thirdDimension;
+	int								mn_offsetX;
+	int								mn_offsetY;
+
+};
+
+#endif

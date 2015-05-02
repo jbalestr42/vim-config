@@ -1,0 +1,314 @@
+#include "ResourcesManager.hpp"
+#include "Octo/OctoLogger.hpp"
+#include <string.h>
+#include <fstream>
+#include <sstream>
+#include <iterator>
+#include <algorithm>
+#include <assert.h>
+
+ResourcesManager *ResourcesManager::msp_current = 0;
+
+/* ---------------------------------------------------------------------- */
+/*                              Base                                      */
+/* ---------------------------------------------------------------------- */
+ResourcesManager::ResourcesManager(void) :
+	mpp_textures(NULL),
+	mpp_fonts(NULL)
+{
+	OctoLogger::log() << "Create Resources Manager";
+}
+
+ResourcesManager::~ResourcesManager(void)
+{
+	if (mpp_fonts)
+	{
+		for (int i = 0; i < m_mainHeader.mn_nbFile[File::e_fileType_font]; ++i)
+		{
+			delete mpp_fonts[i];
+			delete mpp_fontsData[i];
+			mpp_fontsData[i] = NULL;
+		}
+		delete [] mpp_fonts;
+		delete [] mpp_fontsData;
+		mpp_fontsData = NULL;
+	}
+	if (mpp_textures)
+	{
+		for (int i = 0; i < m_mainHeader.mn_nbFile[File::e_fileType_texture]; ++i)
+		{
+			delete mpp_textures[i];
+			mpp_textures[i] = NULL;
+		}
+		delete [] mpp_textures;
+		mpp_textures = NULL;
+	}
+	OctoLogger::log() << "Destoy Resources Manager";
+}
+
+ResourcesManager & ResourcesManager::getCurrent(void)
+{
+	if (!msp_current)
+		msp_current = new ResourcesManager();
+	return (*msp_current);
+}
+
+void ResourcesManager::destroy(void)
+{
+	if (msp_current)
+		delete msp_current;
+	msp_current = 0;
+}
+
+void ResourcesManager::read(std::string const & p_filename, File::EFileType pe_fileType)
+{
+	int index = p_filename.find_last_of("/\\");
+	std::string filename = p_filename.substr(index + 1);
+
+	std::ifstream ifs;
+	ifs.open(p_filename.c_str(), std::ios::binary);
+	ifs.unsetf(std::ios::skipws);
+	ifs.seekg(0, ifs.end);
+
+	File file(ifs.tellg(), filename);
+	ifs.seekg(0, ifs.beg);
+
+	file.m_buffer.reserve(file.m_header.mn_size);
+	file.m_buffer.insert(file.m_buffer.begin(), std::istream_iterator<unsigned char>(ifs), std::istream_iterator<unsigned char>());
+	m_files[pe_fileType].push_back(file);
+	m_mainHeader.mn_nbFile[pe_fileType]++;
+	m_mainHeader.mn_totalSize += file.m_header.mn_size;
+	ifs.close();
+}
+
+int callbackImages(char const *p_path, struct stat const *p_stat, int p_typeFlag)
+{
+	const char *filters[] =
+	{
+		"*.jpg", "*.jpeg", "*.png", "*.gif"
+	};
+
+	(void)p_stat;
+	// if it's a file
+	if (p_typeFlag == FTW_F)
+	{
+		// for each filter
+		for (unsigned i = 0; i < sizeof(filters) / sizeof(filters[0]); i++)
+		{
+			// if the filename matches the filter
+			if (fnmatch(filters[i], p_path, FNM_CASEFOLD) == 0)
+			{
+				// do something
+				OctoLogger::log("Found image: %s", p_path);
+				ResourcesManager::getCurrent().read(p_path, ResourcesManager::File::e_fileType_texture);
+				break;
+			}
+		}
+	}
+	// tell ftw to continue
+	return 0;
+}
+
+int callbackFonts(char const *p_path, struct stat const *p_stat, int p_typeFlag)
+{
+	const char *filters[] =
+	{
+		"*.ttf"
+	};
+
+	(void)p_stat;
+	// if it's a file
+	if (p_typeFlag == FTW_F)
+	{
+		// for each filter
+		for (unsigned i = 0; i < sizeof(filters) / sizeof(filters[0]); i++)
+		{
+			// if the filename matches the filter
+			if (fnmatch(filters[i], p_path, FNM_CASEFOLD) == 0)
+			{
+				// do something
+				OctoLogger::log("Found font: %s", p_path);
+				ResourcesManager::getCurrent().read(p_path, ResourcesManager::File::e_fileType_font);
+				break;
+			}
+		}
+	}
+	// tell ftw to continue
+	return 0;
+}
+
+void ResourcesManager::createResources(std::string const & p_path)
+{
+	char const *pDefines[File::e_fileType_nb] =
+	{
+		"TEXTURE",
+		"FONT",
+	};
+	ftw(p_path.c_str(), callbackImages, 16); // 16 = depth
+	ftw(p_path.c_str(), callbackFonts, 16);
+
+	std::ofstream ofs;
+	ofs.open("data", std::ios::binary);
+	if (ofs.is_open())
+	{
+		std::ofstream ofsInclude;
+		ofsInclude.open("DefineResources.hpp");
+		ofs.write(reinterpret_cast<char *>(&m_mainHeader), sizeof(MainHeader));
+		for (int j = 0; j < File::e_fileType_nb; j++)
+		{
+			int nbFile = 0;
+			for (int i = 0; i < m_mainHeader.mn_nbFile[j]; i++)
+			{
+				ofs.write(reinterpret_cast<char *>(&m_files[j][i].m_header), sizeof(File::Header));
+				ofs.write((char *)&m_files[j][i].m_buffer[0], m_files[j][i].m_header.mn_size);
+
+				// Parse name
+				std::string str = m_files[j][i].m_header.m_name;
+				str = str.substr(0, str.find("."));											// Withdraw extension
+				std::transform(str.begin(), str.end(),str.begin(), ::toupper);				// To upper
+				std::replace(str.begin(), str.end(), '-', '_');								// Replace special char by '_'
+				ofsInclude << "#define " << pDefines[j] << "_" << str << " " << nbFile++ << std::endl;
+			}
+			ofsInclude << std::endl;
+		}
+		ofs.close();
+		ofsInclude.close();
+	}
+	else
+		std::cout << "Fail to open file." << std::endl;
+}
+
+void ResourcesManager::createFiles(std::string const & p_filename)
+{
+	/*
+	std::ifstream ifs;
+	ifs.open(p_filename.c_str(), std::ios::binary);
+	if (ifs.is_open())
+	{
+		ifs.read(reinterpret_cast<char *>(&m_mainHeader), sizeof(MainHeader));
+		std::cout << "Creating " << m_mainHeader.mn_nbTexture << " file(s)." << std::endl;
+		for (int i = 0; i < m_mainHeader.mn_nbTexture; i++)
+		{
+			File file;
+			ifs.read(reinterpret_cast<char *>(&file.m_header), sizeof(File::Header));
+			char *buffer = new char[file.m_header.mn_size];
+			ifs.read(buffer, file.m_header.mn_size);
+			std::cout << file;
+
+			std::ofstream ofs;
+			ofs.open(file.m_header.m_name, std::ios::binary | std::ios::trunc);
+			ofs.write(buffer, file.m_header.mn_size);
+			ofs.close();
+			delete [] buffer;
+		}
+		ifs.close();
+	}
+	else
+		std::cout << "Fail to open data file." << std::endl;
+*/}
+
+void ResourcesManager::createMemoryFile(std::string const & p_filename)
+{
+	std::ifstream ifs;
+	ifs.open(p_filename.c_str(), std::ios::binary);
+	if (ifs.is_open())
+	{
+		ifs.read(reinterpret_cast<char *>(&m_mainHeader), sizeof(MainHeader));
+		mpp_textures = new sf::Texture*[m_mainHeader.mn_nbFile[File::e_fileType_texture]];
+		mpp_fonts = new sf::Font*[m_mainHeader.mn_nbFile[File::e_fileType_font]];
+		mpp_fontsData = new char*[m_mainHeader.mn_nbFile[File::e_fileType_font]];
+		for (int j = 0; j < File::e_fileType_nb; j++)
+		{
+			OctoLogger::log("Loading %d file(s).", m_mainHeader.mn_nbFile[j]);
+			OctoLogger::log().desactivateTime();
+			int nbFile = 0;
+			for (int i = 0; i < m_mainHeader.mn_nbFile[j]; i++)
+			{
+				File file;
+				ifs.read(reinterpret_cast<char *>(&file.m_header), sizeof(File::Header));
+				OctoLogger::log() << file;
+	
+				switch (j)
+				{
+					case File::e_fileType_texture:
+					{
+						char *buffer = new char[file.m_header.mn_size];
+						ifs.read(buffer, file.m_header.mn_size);
+						sf::Texture *pTexture = new sf::Texture();
+						if (!pTexture->loadFromMemory(buffer, file.m_header.mn_size))
+							OctoLogger::log("Failed to create texture : %d", file.m_header.m_name);
+						else
+							mpp_textures[nbFile++] = pTexture;
+						break;
+						delete [] buffer;
+					}
+					case File::e_fileType_font:
+					{
+						mpp_fontsData[nbFile] = new char[file.m_header.mn_size];
+						ifs.read(mpp_fontsData[nbFile], file.m_header.mn_size);
+						sf::Font *pFont = new sf::Font;
+						if (!pFont->loadFromMemory(mpp_fontsData[nbFile], file.m_header.mn_size))
+							OctoLogger::log("Failed to create font : %d", file.m_header.m_name);
+						else
+							mpp_fonts[nbFile++] = pFont;
+						break;
+					}
+				}
+			}
+			OctoLogger::log().activateTime();
+		}
+		ifs.close();
+	}
+	else
+		OctoLogger::log("Fail to open data file: " + p_filename);
+}
+
+sf::Texture & ResourcesManager::getTexture(int pn_index)
+{
+	assert(pn_index >= 0 || pn_index < m_mainHeader.mn_nbFile[File::e_fileType_texture]);
+	return (*mpp_textures[pn_index]);
+}
+
+sf::Font & ResourcesManager::getFont(int pn_index)
+{
+	assert(pn_index >= 0 || pn_index < m_mainHeader.mn_nbFile[File::e_fileType_font]);
+	return (*mpp_fonts[pn_index]);
+}
+
+/* ---------------------------------------------------------------------- */
+/*                              Main Header                               */
+/* ---------------------------------------------------------------------- */
+ResourcesManager::MainHeader::MainHeader(void) :
+	mn_totalSize(0)
+{
+	for (int i = 0; i < File::e_fileType_nb; i++)
+		mn_nbFile[i] = 0;
+}
+
+ResourcesManager::MainHeader::~MainHeader(void) {}
+
+/* ---------------------------------------------------------------------- */
+/*                                File                                    */
+/* ---------------------------------------------------------------------- */
+ResourcesManager::File::File(void)
+{
+	m_header.mn_size = 0;
+	m_header.mn_nameSize = 0;
+	memset(m_header.m_name, 0, 256);
+}
+
+ResourcesManager::File::File(int pn_size, std::string p_name)
+{
+	m_header.mn_size = pn_size;
+	m_header.mn_nameSize = p_name.size();
+	memset(m_header.m_name, 0, 256);
+	memcpy(m_header.m_name, p_name.c_str(), p_name.size());
+}
+
+ResourcesManager::File::~File(void) {}
+
+std::ostream & operator<<(std::ostream & p_ostream, ResourcesManager::File const & p_file)
+{
+	p_ostream << "==== " << p_file.m_header.m_name << " (" << p_file.m_header.mn_nameSize << ") " << p_file.m_header.mn_size << " bits.";
+	return (p_ostream);
+}

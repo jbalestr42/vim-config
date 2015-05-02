@@ -1,0 +1,220 @@
+#include "DataManager.hpp"
+#include "Octo/OctoLogger.hpp"
+#include <string.h>
+#include <fstream>
+#include <sstream>
+#include <iterator>
+#include <algorithm>
+
+DataManager *DataManager::msp_current = 0;
+
+/* ---------------------------------------------------------------------- */
+/*                              Base                                      */
+/* ---------------------------------------------------------------------- */
+DataManager::DataManager(void) {}
+
+DataManager::~DataManager(void)
+{
+	std::map<int, sf::Texture *>::iterator it;
+	for(it = m_textures.begin(); it != m_textures.end() ; ++it)
+	{
+		delete it->second;
+		it->second = NULL;
+	}
+	IOctoLogger::log("Destoy Resources Manager");
+}
+
+DataManager & DataManager::getCurrent(void)
+{
+	if (!msp_current)
+		msp_current = new DataManager();
+	return (*msp_current);
+}
+
+void DataManager::destroy(void)
+{
+	if (msp_current)
+		delete msp_current;
+	msp_current = 0;
+}
+
+void DataManager::read(std::string const & p_filename)
+{
+	int index = p_filename.find_last_of("/\\");
+	std::string filename = p_filename.substr(index + 1);
+
+	std::ifstream ifs;
+	ifs.open(p_filename.c_str(), std::ios::binary);
+	ifs.unsetf(std::ios::skipws);
+	ifs.seekg(0, ifs.end);
+
+	File file(ifs.tellg(), filename);
+	ifs.seekg(0, ifs.beg);
+
+	std::cout << file;
+	file.m_buffer.reserve(file.m_header.mn_size);
+	file.m_buffer.insert(file.m_buffer.begin(), std::istream_iterator<unsigned char>(ifs), std::istream_iterator<unsigned char>());
+	m_files.push_back(file);
+	m_mainHeader.mn_nbFile++;
+	m_mainHeader.mn_totalSize += file.m_header.mn_size;
+	ifs.close();
+}
+
+int callbackImages(char const *p_path, struct stat const *p_stat, int p_typeFlag)
+{
+	const char *filters[] =
+	{
+		"*.jpg", "*.jpeg", "*.png"
+	};
+
+	(void)p_stat;
+	// if it's a file
+	if (p_typeFlag == FTW_F)
+	{
+		// for each filter
+		for (unsigned i = 0; i < sizeof(filters) / sizeof(filters[0]); i++)
+		{
+			// if the filename matches the filter
+			if (fnmatch(filters[i], p_path, FNM_CASEFOLD) == 0)
+			{
+				// do something
+				std::cout << "found image: " << p_path << std::endl;
+				DataManager::getCurrent().read(p_path);
+				break;
+			}
+		}
+	}
+
+	// tell ftw to continue
+	return 0;
+}
+
+void DataManager::createData(std::string const & p_path)
+{
+	ftw(p_path.c_str(), callbackImages, 16); // 16 = depth
+
+	std::ofstream ofs;
+	ofs.open("data", std::ios::binary);
+	if (ofs.is_open())
+	{
+		int nbTexture = 0;
+		std::ofstream ofsInclude;
+		ofsInclude.open("DefineResources.hpp");
+		ofsInclude << "// Defines for each textures" << std::endl;
+		ofs.write(reinterpret_cast<char *>(&m_mainHeader), sizeof(MainHeader));
+		for (int i = 0; i < m_mainHeader.mn_nbFile; i++)
+		{
+			ofs.write(reinterpret_cast<char *>(&m_files[i].m_header), sizeof(File::Header));
+			ofs.write((char *)&m_files[i].m_buffer[0], m_files[i].m_header.mn_size);
+
+			// Parse name
+			std::string str = m_files[i].m_header.m_name;
+			str = str.substr(0, str.find("."));											// Withdraw extension
+			std::transform(str.begin(), str.end(),str.begin(), ::toupper);				// To upper
+			std::replace(str.begin(), str.end(), '-', '_');								// Replace special char by '_'
+			ofsInclude << "#define TEXTURE_" << str << " " << nbTexture++ << std::endl;
+		}
+		ofs.close();
+	}
+	else
+		std::cout << "Fail to open file." << std::endl;
+}
+
+void DataManager::createFiles(std::string const & p_filename)
+{
+	std::ifstream ifs;
+	ifs.open(p_filename.c_str(), std::ios::binary);
+	if (ifs.is_open())
+	{
+		ifs.read(reinterpret_cast<char *>(&m_mainHeader), sizeof(MainHeader));
+		std::cout << "Creating " << m_mainHeader.mn_nbFile << " file(s)." << std::endl;
+		for (int i = 0; i < m_mainHeader.mn_nbFile; i++)
+		{
+			File file;
+			ifs.read(reinterpret_cast<char *>(&file.m_header), sizeof(File::Header));
+			char *buffer = new char[file.m_header.mn_size];
+			ifs.read(buffer, file.m_header.mn_size);
+			std::cout << file;
+
+			std::ofstream ofs;
+			ofs.open(file.m_header.m_name, std::ios::binary | std::ios::trunc);
+			ofs.write(buffer, file.m_header.mn_size);
+			ofs.close();
+			delete [] buffer;
+		}
+		ifs.close();
+	}
+	else
+		std::cout << "Fail to open data file." << std::endl;
+}
+
+void DataManager::createMemoryFile(std::string const & p_filename)
+{
+	std::ifstream ifs;
+	ifs.open(p_filename.c_str(), std::ios::binary);
+	if (ifs.is_open())
+	{
+		ifs.read(reinterpret_cast<char *>(&m_mainHeader), sizeof(MainHeader));
+		int nbTexture = 0;
+		IOctoLogger::log() << "Creating " << m_mainHeader.mn_nbFile << " file(s).";
+		for (int i = 0; i < m_mainHeader.mn_nbFile; i++)
+		{
+			File file;
+			ifs.read(reinterpret_cast<char *>(&file.m_header), sizeof(File::Header));
+			char *buffer = new char[file.m_header.mn_size];
+			ifs.read(buffer, file.m_header.mn_size);
+			IOctoLogger::log() << file;
+
+			sf::Texture *pTexture = new sf::Texture();
+			if (!pTexture->loadFromMemory(buffer, file.m_header.mn_size))
+				std::cout << "iNok" << std::endl; //IOctoLogger::log() << "Failed to create texture (" << file.m_header.m_name;
+			else
+			{
+				std::cout << "ok" << std::endl; //
+				m_textures[nbTexture++] = pTexture;
+			}
+			delete [] buffer;
+		}
+		ifs.close();
+	}
+	else
+		IOctoLogger::log() << "Fail to open data file: " << p_filename;
+}
+
+/* ---------------------------------------------------------------------- */
+/*                              Main Header                               */
+/* ---------------------------------------------------------------------- */
+DataManager::MainHeader::MainHeader(void) :
+	mn_nbFile(0),
+	mn_totalSize(0)
+{}
+
+DataManager::MainHeader::~MainHeader(void) {}
+
+/* ---------------------------------------------------------------------- */
+/*                                File                                    */
+/* ---------------------------------------------------------------------- */
+DataManager::File::File(void)
+{
+	m_header.mn_size = 0;
+	m_header.mn_nameSize = 0;
+	memset(m_header.m_name, 0, 256);
+}
+
+DataManager::File::File(int pn_size, std::string p_name)
+{
+	m_header.mn_size = pn_size;
+	m_header.mn_nameSize = p_name.size();
+	memset(m_header.m_name, 0, 256);
+	memcpy(m_header.m_name, p_name.c_str(), p_name.size());
+}
+
+DataManager::File::~File(void) {}
+
+std::ostream & operator<<(std::ostream & p_ostream, DataManager::File const & p_file)
+{
+	p_ostream << p_file.m_header.m_name << "(" << p_file.m_header.mn_nameSize << ") " << p_file.m_header.mn_size << "o." << std::endl;
+	return (p_ostream);
+}
+
+

@@ -1,0 +1,10 @@
+typedef struct	s_complex
+{
+	double	r;
+	double	i;
+}		t_complex;
+
+void add_complex()
+{
+
+}
