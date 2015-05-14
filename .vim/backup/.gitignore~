@@ -1,0 +1,5 @@
+*
+!.vim
+!.vimrc
+.vim/backup/*
+.vim/bundle

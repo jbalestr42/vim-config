@@ -12,6 +12,7 @@ snippet beginend "$1.begin(), $1.end() (beginend)"
 ${1:v}${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}begin(), $1${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}end()
 endsnippet
 
+<<<<<<< HEAD
 snippet vec
 sf::Vector2f
 endsnippet
@@ -20,6 +21,8 @@ snippet sc
 static_cast<${1:int}>(${2})${3}
 endsnippet
 
+=======
+>>>>>>> 268224a7081075062613626dcd69f7ac4084c7ca
 snippet io
 #include <iostream>
 endsnippet
@@ -33,8 +36,11 @@ std::cout << "${1:caca}" << std::endl;
 endsnippet
 
 snippet clc "class .. (class)"
+<<<<<<< HEAD
 #include "${1:`!p snip.rv = snip.basename or "name"`}.hpp"
 
+=======
+>>>>>>> 268224a7081075062613626dcd69f7ac4084c7ca
 ${1:`!p snip.rv = snip.basename or "name"`}::$1(void) { }
 
 $1::~$1(void) { }

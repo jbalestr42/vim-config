@@ -1,0 +1,3 @@
+" Load vim config
+source ~/.vim/config/settings.vim
+source ~/.vim/config/plugins.vim
