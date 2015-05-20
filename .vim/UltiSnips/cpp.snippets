@@ -29,7 +29,16 @@ std::cout << "caca" << std::endl;
 endsnippet
 
 snippet cout
-std::cout << "${1:caca}" << std::endl;
+std::cout << ${1} << std::endl;
+endsnippet
+
+snippet ifn
+#ifndef ${1:`!p snip.rv = snip.basename.upper()`}_HPP
+# define ${1:`!p snip.rv = snip.basename.upper()`}_HPP
+
+${2}
+
+#endif
 endsnippet
 
 snippet clc "class .. (class)"
