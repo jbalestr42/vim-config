@@ -1,4 +1,8 @@
 *
-!.vim
+!.vim/bundle
+!.vim/colors
+!.vim/config
+!.vim/plugin
+!.vim/UltiSnips
 !.vimrc
 .vim/backup/*
