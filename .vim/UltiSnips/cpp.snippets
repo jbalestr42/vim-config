@@ -24,6 +24,11 @@ snippet io
 #include <iostream>
 endsnippet
 
+snippet acc
+inline void set${1/\w+\s*/\u$0/}(${2///} ${1/\w+\s*/\l$0/}) { m_${1///} = ${1///}; }
+inline ${2} get${1/\w+\s*/\u$0/}(void) const { return m_${1}; }
+endsnippet
+
 snippet deb
 std::cout << "caca" << std::endl;
 endsnippet
@@ -36,7 +41,15 @@ snippet ifn
 #ifndef ${1:`!p snip.rv = snip.basename.upper()`}_HPP
 # define ${1:`!p snip.rv = snip.basename.upper()`}_HPP
 
-${2}
+class ${1:`!p snip.rv = snip.basename or "name"`}
+{
+public:
+	$1(void);
+	virtual ~$1(void);
+
+private:
+
+};
 
 #endif
 endsnippet
