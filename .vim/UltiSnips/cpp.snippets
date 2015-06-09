@@ -12,12 +12,20 @@ snippet beginend "$1.begin(), $1.end() (beginend)"
 ${1:v}${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}begin(), $1${1/^.*?(-)?(>)?$/(?2::(?1:>:.))/}end()
 endsnippet
 
+snippet ins
+#include <${1}>
+endsnippet
+
 snippet in
 #include "${1}.hpp"
 endsnippet
 
 snippet vec
 sf::Vector2f
+endsnippet
+
+snippet dc
+dynamic_cast<${1:int}>(${2})${3}
 endsnippet
 
 snippet sc
