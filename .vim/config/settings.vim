@@ -65,3 +65,7 @@ set foldlevel=1										" this is just what i use
 
 " tags for autoindent
 set tags=~/.vim/tags/tags
+
+" Persistent undo
+set undofile
+set undodir=~/.vim/undodir
