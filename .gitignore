@@ -4,6 +4,6 @@
 !.vim/config
 !.vim/plugin
 !.vim/UltiSnips
-!.vim/undodir/.README
+!.vim/undodir/README
 !.vimrc
 .vim/backup/*
