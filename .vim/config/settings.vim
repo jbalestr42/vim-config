@@ -25,6 +25,10 @@ set relativenumber
 autocmd InsertEnter * :set number
 autocmd InsertLeave * :set relativenumber
 
+" Command to load and update session
+au VimEnter * nested :call LoadSession()
+au VimLeave * :call UpdateSession()
+
 " Mouse config
 set mouse=a											" Use mouse
 set mousehide										" Hide mouse while typing
