@@ -36,6 +36,7 @@ set virtualedit=onemore								" Allow for cursor beyond last character
 set history=1000									" History up to 1000 (default: 20)
 set ignorecase										" Ignore case sensitive on search
 set smartcase										" Smartcase search
+set hlsearch										" Highlight the search
 filetype on											" Detect file type
 set showcmd
 set showmode										" Display current mode
