@@ -1,15 +1,9 @@
-"Put your custom Vim configuration here
-
-"Better command completion
-"set wildmenu
-"set wildmode=list:longest
-
-"show current line
+" Put your custom Vim configuration here
 
 set encoding=utf8
 set term=$TERM										" Make arrow and other keys work
 
-"//Display
+" Display
 set background=dark
 set cursorline
 syntax on
@@ -18,25 +12,27 @@ set rulerformat=%30(%=\:b%n%y%m%r%w\ %l,%c%V\ %P%)	" A ruler on steroids
 set showmatch										" Show matching brackets/parenthesis
 set scrolloff=30									" Minimum lines to keep above and below cursor
 set list
-set listchars=tab:⠤\ ,trail:♪,extends:#,nbsp:." Highlight problematic whitespace
-"set colorcolumn=80
+set listchars=tab:⠤\ ,trail:♪,extends:#,nbsp:.		" Highlight problematic whitespace
+" Set colorcolumn=80								" Highlight when column > 80
 set nowrap
+set tabstop=4										" tabulation = 4 char
 
 " Color
 colorscheme solarized
 
-"set nu												" Show line number
+" Set nu											" Show line number
 set relativenumber
 autocmd InsertEnter * :set number
 autocmd InsertLeave * :set relativenumber
 
-"//mouse config
+" Mouse config
 set mouse=a											" Use mouse
 set mousehide										" Hide mouse while typing
-"//keyboard config
+
+" Keyboard config
 set virtualedit=onemore								" Allow for cursor beyond last character
 
-"//other
+" Other
 set history=1000									" History up to 1000 (default: 20)
 set ignorecase										" Ignore case sensitive on search
 set smartcase										" Smartcase search
@@ -46,8 +42,9 @@ set showmode										" Display current mode
 set ai												" Auto indent
 set si												" Smart indent
 set wildmenu										" Better comment completion
+set wildmode=list:longest
 set backspace=eol,start,indent						" Backspace
-set backup											" Keep ackup files
+set backup											" Keep backup files
 set backupdir=~/.vim/backup							" Backup files directory
 set dir=~/.vim/backup								" Swap files directory
 
@@ -57,14 +54,14 @@ set novisualbell
 set t_vb=
 set tm=500
 
-"folding settings
+" Folding settings
 set foldmethod=indent								" Fold based on indent
 set foldnestmax=10									" Deepest fold is 10 levels
 set nofoldenable									" Dont fold by default
 set foldlevel=1										" this is just what i use
 
-" tags for autoindent
-set tags=~/.vim/tags/tags
+" Tags for autocompletion
+set tags=~/.vim/tags/tags							" Directory to find tags used for autocompletion
 
 " Persistent undo
 set undofile
