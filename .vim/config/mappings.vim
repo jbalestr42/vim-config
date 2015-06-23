@@ -29,8 +29,8 @@ command -nargs=0 -bar Update if &modified
                            \|endif
 nnoremap <silent> <C-s> :<C-u>Update<CR>
 
-" Ctrl+x make a session
-map <C-x> :call MakeSession()<CR>
+" Ctrl+q make a session
+map <C-m> :call MakeSession()<CR>
 
 " Ctrl+m save and quit all, and update the session if it exist
 map <C-p> :wqa<CR>

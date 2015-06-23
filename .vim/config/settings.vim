@@ -27,7 +27,9 @@ autocmd InsertLeave * :set relativenumber
 
 " Command to load and update session
 au VimEnter * nested :call LoadSession()
-au VimLeave * :call UpdateSession()
+"au VimLeave * :call UpdateSession()
+" Save when focus lost
+au FocusLost * :wa
 
 " Mouse config
 set mouse=a											" Use mouse
