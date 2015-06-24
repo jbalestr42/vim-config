@@ -1,9 +1,14 @@
-*
-.vim/backup/*
-!.vim/bundle
-!.vim/colors
-!.vim/config
-!.vim/plugin
-!.vim/UltiSnips
-!.vim/undodir/README
+# Exclude all but .vim directory
+/*
+!.vim
 !.vimrc
+
+# Sessions is created if it doesn't exist
+.vim/sessions
+
+# Dont track backup files
+.vim/backup/*
+
+# Undodir must be created
+.vim/undodir/*
+!.vim/undodir/.README
