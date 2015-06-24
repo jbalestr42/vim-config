@@ -29,10 +29,10 @@ command -nargs=0 -bar Update if &modified
                            \|endif
 nnoremap <silent> <C-s> :<C-u>Update<CR>
 
-" Ctrl+q make a session
+" Ctrl+m make a session
 map <C-m> :call MakeSession()<CR>
 
-" Ctrl+m save and quit all, and update the session if it exist
+" Ctrl+p save and quit all, and update the session if it exist
 map <C-p> :wqa<CR>
 
 " Reload .vimrc when reloading a file that might have changed
