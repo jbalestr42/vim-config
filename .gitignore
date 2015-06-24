@@ -1,4 +1,5 @@
 *
+.vim/backup/*
 !.vim/bundle
 !.vim/colors
 !.vim/config
@@ -6,4 +7,3 @@
 !.vim/UltiSnips
 !.vim/undodir
 !.vimrc
-.vim/backup/*
