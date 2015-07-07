@@ -11,11 +11,12 @@ set ruler											" Show the ruler
 set rulerformat=%30(%=\:b%n%y%m%r%w\ %l,%c%V\ %P%)	" A ruler on steroids
 set showmatch										" Show matching brackets/parenthesis
 set scrolloff=30									" Minimum lines to keep above and below cursor
-set list
 set listchars=tab:⠤\ ,trail:♪,extends:#,nbsp:.		" Highlight problematic whitespace
+set list
 " Set colorcolumn=80								" Highlight when column > 80
 set nowrap
 set tabstop=4										" tabulation = 4 char
+set shiftwidth=4
 
 " Color
 colorscheme solarized
@@ -43,11 +44,12 @@ set history=1000									" History up to 1000 (default: 20)
 set ignorecase										" Ignore case sensitive on search
 set smartcase										" Smartcase search
 set hlsearch										" Highlight the search
-filetype on											" Detect file type
 set showcmd
 set showmode										" Display current mode
-set ai												" Auto indent
-set si												" Smart indent
+set smartindent
+set autoindent
+set cindent
+filetype indent on											" Detect file type
 set wildmenu										" Better comment completion
 set wildmode=list:longest
 set backspace=eol,start,indent						" Backspace
