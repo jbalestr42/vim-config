@@ -8,7 +8,11 @@
 
 # Dont track backup files
 .vim/backup/*
+!.vim/backup/README.md
 
 # Undodir must be created
 .vim/undodir/*
-!.vim/undodir/.README
+!.vim/undodir/README.md
+
+# keep README
+!README.md
