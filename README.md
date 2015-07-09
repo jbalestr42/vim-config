@@ -14,3 +14,6 @@ git checkout -b master --track origin/master # origin/master is clone's default
 
 Solarized theme
 https://github.com/altercation/solarized
+
+More powerline
+http://computers.tutsplus.com/tutorials/getting-spiffy-with-powerline--cms-20740
