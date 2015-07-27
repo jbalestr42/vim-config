@@ -1,16 +1,3 @@
-" **************************************************************************** "
-"                                                                              "
-"                                                         :::      ::::::::    "
-"    stdheader.vim                                      :+:      :+:    :+:    "
-"                                                     +:+ +:+         +:+      "
-"    By: zaz <zaz@staff.42.fr>                      +#+  +:+       +#+         "
-"                                                 +#+#+#+#+#+   +#+            "
-"    Created: 2013/06/15 12:45:56 by zaz               #+#    #+#              "
-"    Updated: 2014/03/03 17:49:33 by pciavald         ###   ########.fr        "
-"                                                                              "
-" **************************************************************************** "
-
-
 let s:asciiart = [
 			\"        :::      ::::::::",
 			\"      :+:      :+:    :+:",
@@ -57,13 +44,13 @@ let s:marginlen		= 5
 let s:contentlen	= s:linelen - (3 * s:marginlen - 1) - strlen(s:asciiart[0])
 
 function s:trimlogin ()
-	let l:USER = "pciavald"
+	let l:USER = "jbalestr"
 	let l:trimlogin = strpart(USER, 0, 9)
 	return l:trimlogin
 endfunction
 
 function s:trimemail ()
-	let l:MAIL = "pciavald@student.42.fr"
+	let l:MAIL = "jbalestr@student.42.fr"
 	let l:trimemail = strpart(MAIL, 0, s:contentlen - 16)
 	return l:trimemail
 endfunction
