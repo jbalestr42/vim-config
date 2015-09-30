@@ -20,6 +20,7 @@ Plugin 'scrooloose/NERDTree'
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
 Plugin 'sjl/gundo.vim'
 Plugin 'SirVer/ultisnips'
+Plugin 'tikhomirov/vim-glsl'
 call vundle#end()
 
 filetype plugin indent on
