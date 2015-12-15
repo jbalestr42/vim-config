@@ -49,6 +49,26 @@ snippet cout
 std::cout << ${1} << std::endl;
 endsnippet
 
+snippet ifnc
+#ifndef ${1:`!p snip.rv = snip.basename.upper()`}_HPP
+# define ${1:`!p snip.rv = snip.basename.upper()`}_HPP
+
+class ${1:`!p snip.rv = snip.basename or "name"`}
+{
+public:
+	$1(void);
+	$1($1 const & ${1/\w+\s*/\l$0/});
+	virtual ~$1(void);
+
+	$1 & operator=($1 const & ${1/\w+\s*/\l$0/});
+
+private:
+
+};
+
+#endif
+endsnippet
+
 snippet ifn
 #ifndef ${1:`!p snip.rv = snip.basename.upper()`}_HPP
 # define ${1:`!p snip.rv = snip.basename.upper()`}_HPP
@@ -74,19 +94,21 @@ ${1:`!p snip.rv = snip.basename or "name"`}::$1(void) { }
 $1::~$1(void) { }
 endsnippet
 
-snippet clca "class .. (class)"
+snippet clcc "class .. (class)"
+#include "${1:`!p snip.rv = snip.basename or "name"`}.hpp"
+
 ${1:`!p snip.rv = snip.basename or "name"`}::$1(void) { }
 
-$1::$1($1 const & p_${1/\w+\s*/\l$0/})
+$1::$1($1 const & ${1/\w+\s*/\l$0/})
 {
-	*this = p_${1/\w+\s*/\l$0/};
+	*this = ${1/\w+\s*/\l$0/};
 }
 
 $1::~$1(void) { }
 
-$1 & $1::operator=($1 const & p_${1/\w+\s*/\l$0/})
+$1 & $1::operator=($1 const & ${1/\w+\s*/\l$0/})
 {
-	(void)p_${1/\w+\s*/\l$0/};
+	(void)${1/\w+\s*/\l$0/};
 	return (*this);
 }
 
