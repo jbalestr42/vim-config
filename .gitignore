@@ -6,6 +6,11 @@
 # Sessions is created if it doesn't exist
 .vim/sessions
 
+# Dont track bundles (use BundleInstall in vim)
+.vim/bundle/*
+!.vim/bundle/vundle
+!.vim/bundle/vundle.vim
+
 # Dont track backup files
 .vim/backup/*
 !.vim/backup/README.md
