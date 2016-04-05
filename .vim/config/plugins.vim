@@ -21,6 +21,7 @@ autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTree
 Plugin 'sjl/gundo.vim'
 Plugin 'SirVer/ultisnips'
 Plugin 'tikhomirov/vim-glsl'
+Plugin 'brgmnn/vim-opencl'
 call vundle#end()
 
 filetype plugin indent on
