@@ -21,9 +21,9 @@ vec3 hsvTorgb(vec3 c)
 endsnippet
 
 snippet inbox
-float insideBox(vec2 v, vec2 bottomLeft, vec2 topRight)
+float insideBox(vec2 v, vec2 top_left, vec2 bot_right)
 {
-	vec2 s = step(bottomLeft, v) - step(topRight, v);
+	vec2 s = step(top_left, v) - step(bot_right, v);
 	return s.x * s.y;
 }
 endsnippet
