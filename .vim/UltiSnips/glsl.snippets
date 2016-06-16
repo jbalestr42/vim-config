@@ -27,3 +27,11 @@ float insideBox(vec2 v, vec2 top_left, vec2 bot_right)
 	return s.x * s.y;
 }
 endsnippet
+
+snippet inboxsmooth
+float insideSmoothBox(vec2 v, vec2 top_left, vec2 bot_right, float t)
+{
+	vec2 s = smoothstep(top_left, top_left + t, v) - smoothstep(bot_right - t, bot_right, v);
+	return s.x * s.y;
+}
+endsnippet
