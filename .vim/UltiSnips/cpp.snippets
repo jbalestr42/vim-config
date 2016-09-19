@@ -41,16 +41,35 @@ inline void set${1/\w+\s*/\u$0/}(${2///} ${1/\w+\s*/\l$0/}) { m_${1///} = ${1///
 inline ${2} get${1/\w+\s*/\u$0/}(void) const { return m_${1}; }
 endsnippet
 
-snippet deb
-std::cout << "caca" << std::endl;
-endsnippet
-
 snippet cerr
 std::cerr << ${1} << std::endl;
 endsnippet
 
 snippet cout
 std::cout << ${1} << std::endl;
+endsnippet
+
+snippet debi
+#include <Application.hpp>
+#include <Console.hpp>
+endsnippet
+
+snippet deb
+octo::Application::getConsole().addCommand(L"ori.${1:`!p snip.rv = snip.basename or "name"`}", [this](sf::Vector2f const & p)
+{
+	setOrigin(p);
+	std::cout << "${1:`!p snip.rv = snip.basename or "name"`} : origin " << p.x << " " << p.y << std::endl;
+	});
+octo::Application::getConsole().addCommand(L"size.${1:`!p snip.rv = snip.basename or "name"`}", [this](sf::Vector2f const & p)
+{
+	setSize(p);
+	std::cout << "${1:`!p snip.rv = snip.basename or "name"`} : size " << p.x << " " << p.y << std::endl;
+	});
+octo::Application::getConsole().addCommand(L"texOff.${1:`!p snip.rv = snip.basename or "name"`}", [this](sf::Vector2f const & p)
+{
+	setTextOffset(p);
+	std::cout << "${1:`!p snip.rv = snip.basename or "name"`} : textOff " << p.x << " " << p.y << std::endl;
+	});
 endsnippet
 
 snippet ifnc
