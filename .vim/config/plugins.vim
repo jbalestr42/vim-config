@@ -4,10 +4,8 @@ filetype off
 set laststatus=2	
 set t_Co=256
 set nocompatible
-set rtp+=~/.vim/bundle/vundle.vim
+set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
-
-Plugin 'gmarik/vundle'
 
 "Plugin 'scrooloose/syntastic'
 "Plugin 'scrooloose/nerdcommenter'

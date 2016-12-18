@@ -8,8 +8,8 @@
 
 # Dont track bundles (use BundleInstall in vim)
 .vim/bundle/*
-!.vim/bundle/vundle
-!.vim/bundle/vundle.vim
+# Except a submodule to Vundle
+!.vim/bundle/Vundle.vim
 
 # Dont track backup files
 .vim/backup/*
