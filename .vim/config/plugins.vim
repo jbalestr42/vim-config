@@ -21,8 +21,6 @@ Plugin 'SirVer/ultisnips'
 Plugin 'tikhomirov/vim-glsl'
 Plugin 'brgmnn/vim-opencl'
 Plugin 'easymotion/vim-easymotion'
-Plugin 'terryma/vim-multiple-cursors'
-"Plugin 'katono/rogue.vim'
 call vundle#end()
 
 filetype plugin indent on
@@ -43,3 +41,10 @@ let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 
 " If you want :UltiSnipsEdit to split your window.
 let g:UltiSnipsEditSplit="vertical"
+
+" s{char}{char} to move to {char}{char}
+nmap s <Plug>(easymotion-overwin-f2)
+
+" Move to word
+map  sw <Plug>(easymotion-bd-w)
+nmap sw <Plug>(easymotion-overwin-w)
