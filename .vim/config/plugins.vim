@@ -20,6 +20,9 @@ Plugin 'sjl/gundo.vim'
 Plugin 'SirVer/ultisnips'
 Plugin 'tikhomirov/vim-glsl'
 Plugin 'brgmnn/vim-opencl'
+Plugin 'easymotion/vim-easymotion'
+Plugin 'terryma/vim-multiple-cursors'
+"Plugin 'katono/rogue.vim'
 call vundle#end()
 
 filetype plugin indent on
