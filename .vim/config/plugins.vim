@@ -18,7 +18,7 @@ Plugin 'scrooloose/NERDTree'
 autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTreeType") && b:NERDTreeType == "primary") | q | endif
 Plugin 'sjl/gundo.vim'
 Plugin 'SirVer/ultisnips'
-Plugin 'tikhomirov/vim-glsl'
+Plugin 'vim-scripts/ShaderHighLight'
 Plugin 'brgmnn/vim-opencl'
 Plugin 'easymotion/vim-easymotion'
 "Plugin 'ctrlpvim/ctrlp.vim'
