@@ -1,19 +1,24 @@
-Power line
-cd~
-wget https://github.com/Lokaltog/powerline/raw/develop/font/PowerlineSymbols.otf
-mv PowerlineSymbols.otf ~/.local/share/fonts/
-sudo fc-cache -f -v
-get https://github.com/Lokaltog/powerline/raw/develop/font/10-powerline-symbols.conf
-mkdir -p ~/.config/fontconfig/fonts.conf
-mv 10-powerline-symbols.conf ~/.config/fontconfig/fonts.conf/
+Fresh install with Linux
+sudo apt-get install vim<br />
+sudo apt-get install zsh<br />
+cd<br />
+sudo apt-get install curl<br />
+sudo apt-get install git<br />
+sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"<br />
+cd<br />
+wget https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf<br />
+wget https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf<br />
+mkdir ~/.fonts<br />
+mv PowerlineSymbols.otf ~/.fonts/<br />
+mkdir -p .config/fontconfig/conf.d #if directory doesn't exists<br />
+fc-cache -vf ~/.fonts/<br />
+mv 10-powerline-symbols.conf ~/.config/fontconfig/conf.d/<br />
 
-git init
-git remote add origin $url_of_clone_source
-git fetch origin
-git checkout -b master --track origin/master # origin/master is clone's default
+git init<br />
+git remote add origin git@github.com:jbalestr42/vim-config.git<br />
+git fetch origin<br />
+git checkout -b master --track origin/master<br />
 
-Solarized theme
-https://github.com/altercation/solarized
-
-More powerline
-http://computers.tutsplus.com/tutorials/getting-spiffy-with-powerline--cms-20740
+git submodule init<br />
+git submodule update<br />
+vim +PluginInstall +qall<br />
