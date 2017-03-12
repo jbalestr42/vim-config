@@ -1,5 +1,4 @@
-# Fresh install with Linux<br />
-sudo apt-get install vim<br />
+# Install oh-my-zsh and the powerline fonts<br />
 sudo apt-get install zsh<br />
 cd<br />
 sudo apt-get install curl<br />
@@ -8,12 +7,14 @@ sh -c "$(curl -fsSL https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/i
 cd<br />
 wget https://github.com/powerline/powerline/raw/develop/font/PowerlineSymbols.otf<br />
 wget https://github.com/powerline/powerline/raw/develop/font/10-powerline-symbols.conf<br />
-mkdir ~/.fonts<br />
+mkdir -p ~/.fonts<br />
 mv PowerlineSymbols.otf ~/.fonts/<br />
-mkdir -p .config/fontconfig/conf.d #if directory doesn't exists<br />
+mkdir -p .config/fontconfig/conf.d<br />
 fc-cache -vf ~/.fonts/<br />
 mv 10-powerline-symbols.conf ~/.config/fontconfig/conf.d/<br />
 
+# Install vim and init the repository
+sudo apt-get install vim<br />
 git init<br />
 git remote add origin git@github.com:jbalestr42/vim-config.git<br />
 git fetch origin<br />
