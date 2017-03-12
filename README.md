@@ -1,4 +1,4 @@
-Fresh install with Linux
+# Fresh install with Linux<br />
 sudo apt-get install vim<br />
 sudo apt-get install zsh<br />
 cd<br />
